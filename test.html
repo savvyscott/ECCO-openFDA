@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Untitled Document</title>
+<script src="Scripts/jquery-2.1.4.js"></script>
+<script>
+	var openFdaDrugSite='https://api.fda.gov/drug/event.json';
+	var openFdaLabelSite='https://api.fda.gov/drug/label.json';
+	var openFdaEnforcementSite='https://api.fda.gov/drug/enforcement.json';
+	var openFdaApiKey='?api_key=ovNVdm7TO3IlzJr8ABOS6Zpdad70SNsBV3NW757e';
+	var openFdaSearchInteractions='&search=patient.drug.medicinalproduct:';
+	var openFdaSearchLabel='&search=package_label_principal_display_panel:';
+	var openFdaSearchDrugName='&search=openfda.brand_name:{search}+openfda.generic_name:{search}';
+	var openFdaLimit='&limit=10';
+	var searchText = "";
+	
+	function retrieveResults() {
+		
+		searchText = $("#searchTerm").val();
+		searchText = searchText.replace(" ", "+");
+		openFdaSearchDrugName = openFdaSearchDrugName.replace(new RegExp("{search}", 'g'), searchText);
+		var fdaUrl=openFdaLabelSite + openFdaApiKey + openFdaLimit + openFdaSearchDrugName + '"'+searchText+'"';
+		console.log(fdaUrl);
+		$.ajax( {
+			url: fdaUrl
+		} )
+		.done(function( data) {
+			console.log(data);
+//			var patientData = data.results[0].patient;
+//			var drugList = patientData.drug;
+//			console.log( drugList);
+//			var tbl = document.createElement("table");
+//			var fragment = document.createDocumentFragment();
+//			for( var a = 0; a < drugList.length; a++)
+//			{
+//				var tr = document.createElement("tr");
+//				var cell = document.createAttribute("td");
+//				cell.innerHTML = drugList[a].medicinalproduct;
+//				tr.appendChild(cell);
+//				fragment.appendChild(tr);
+//			}
+//			tbl.appendChild(fragment);
+//			$("#resultsDiv").html(tbl);
+	})
+		.fail(function( data) {
+			if( data.statusText == "Not Found")
+			{
+				$("#resultsDiv").html("Search found no results");
+			}
+			console.log( data.statusText);
+		})
+		;
+	}
+</script>
+
+</head>
+
+<body>
+<input type="text" id="searchTerm" value="Topamax">
+<input type="button" value="Get Data" onClick="retrieveResults();">
+<table id="resultsTable">
+</table>
+<div id="resultsDiv">
+</div>
+</body>
+</html>
