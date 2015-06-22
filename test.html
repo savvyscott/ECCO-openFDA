@@ -9,25 +9,58 @@
 	var openFdaLabelSite='https://api.fda.gov/drug/label.json';
 	var openFdaEnforcementSite='https://api.fda.gov/drug/enforcement.json';
 	var openFdaApiKey='?api_key=ovNVdm7TO3IlzJr8ABOS6Zpdad70SNsBV3NW757e';
-	var openFdaSearchInteractions='&search=patient.drug.medicinalproduct:';
-	var openFdaSearchLabel='&search=package_label_principal_display_panel:';
+	//var openFdaSearchInteractions='&search=patient.drug.medicinalproduct:';
+	//var openFdaSearchLabel='&search=package_label_principal_display_panel:';
 	var openFdaSearchDrugName='&search=openfda.brand_name:{search}+openfda.generic_name:{search}';
+	var openFdaSearchIndications='&search=openfda.indications_and_usage:{search}';
 	var openFdaLimit='&limit=10';
 	var searchText = "";
 	
 	function retrieveResults() {
-		
+		searchText = new String("");
 		searchText = $("#searchTerm").val();
 		searchText = searchText.replace(" ", "+");
-		openFdaSearchDrugName = openFdaSearchDrugName.replace(new RegExp("{search}", 'g'), searchText);
-		var fdaUrl=openFdaLabelSite + openFdaApiKey + openFdaLimit + openFdaSearchDrugName + '"'+searchText+'"';
-		console.log(fdaUrl);
+		openFdaSearchIndications = openFdaSearchIndications.replace(new RegExp("{search}", 'g'), searchText);
+		var fdaUrl=openFdaLabelSite + openFdaApiKey + openFdaLimit + openFdaSearchIndications + '"'+searchText+'"';
+		
+		// console.log(fdaUrl);
+		
 		$.ajax( {
 			url: fdaUrl
 		} )
 		.done(function( data) {
-			console.log(data);
-//			var patientData = data.results[0].patient;
+			//console.log(data);
+			var metaTotal = data.results.length;
+			//console.log(metaTotal);
+			for( var ndx = 0; ndx < metaTotal; ndx++)
+			{
+//				var description = data.results[ndx].description[0];
+//				console.log(description);
+				var thisRow = data.results[ndx];
+				var brandName = thisRow.openfda.brand_name;
+				//console.log('Brand Name: ' + brandName);
+				var genericName = thisRow.openfda.generic_name;
+				//console.log('Generic Name: ' + genericName);
+				var indicationsUsage = thisRow.indications_and_usage;
+				//console.log('Indications: ' + indicationsUsage);
+				var drugInteractions = thisRow.drug_interactions;
+				//console.log('Interactions: ' + drugInteractions);
+				var x = new String(indicationsUsage);
+				
+				var x1 = x.indexOf('/\:/');
+				// var x1 = x.indexOf((/\(\d\.\d\)\.\ /));
+				console.log(x1);
+				if( x1 > -1)
+				{
+					var x2 = x.substring(x1, x.indexOf(/\:/, x1));
+					console.log(x2);
+				}
+				
+				x = x.split(/\(\d\.\d\)\./g);
+				console.log(ndx);
+				console.log(x);
+				$("#resultsDiv").html("<p>" +brandName + "<br /><br />" + genericName + "<br /><br />" + indicationsUsage + "</p>");
+		}
 //			var drugList = patientData.drug;
 //			console.log( drugList);
 //			var tbl = document.createElement("table");
@@ -57,7 +90,7 @@
 </head>
 
 <body>
-<input type="text" id="searchTerm" value="Topamax">
+<input type="text" id="searchTerm">
 <input type="button" value="Get Data" onClick="retrieveResults();">
 <table id="resultsTable">
 </table>
